@@ -4,12 +4,10 @@ import cors from 'cors';
 import pino from 'pino-http';
 import 'dotenv/config';
 
-
 const app = express();
 
-// Використовуємо значення з .env або дефолтний порт 3000
+// Використовуємо значення з .env або дефолтний порт 3030
 const PORT = process.env.PORT ?? 3030;
-
 
 // Middleware для парсингу JSON
 app.use(express.json());
@@ -32,49 +30,42 @@ app.use(
 );
 
 
-
-// Логування часу
+// Middleware для логування
 app.use((req, res, next) => {
   console.log(`Time: ${new Date().toLocaleString()}`);
   next();
 });
 
-// Перший маршрут
-app.get('/', (req, res) => {
-  res.status(200).json({ message: 'Hello world!' });
+// // Перший маршрут
+// app.get('/', (req, res) => {
+//   res.status(200).json({ message: 'Hello world!' });
+// });
+
+// Маршрут, який буде повертати всі нотатки:
+app.get('/notes', (req, res) => {
+  res.status(200).json({ message: "Retrieved all notes" });
 });
 
-// Конкретний користувач за id
-app.get('/users/:userId', (req, res) => {
-  const { userId } = req.params;
-  res.status(200).json({ id: userId, name: 'Jacob' });
+// Маршрут, який буде повертати одну нотатку за її ідентифікатором
+app.get('/notes/:noteId', (req, res) => {
+  const { noteId } = req.params;
+  res.status(200).json({ message: `Retrieved note with ID: ${noteId}` });
 });
 
-
-app.post('/users', (req, res) => {
-  console.log(req.body); // тепер тіло доступне як JS-об’єкт
-  res.status(201).json({ message: 'User created' });
+// Cпеціальний тестовий маршрут для імітації виникнення помилки
+app.get('/test-error', () => {
+  throw new Error('Simulated server error');
 });
 
-// Маршрут для тестування middleware помилки
-app.get('/test-error', (req, res) => {
-  // Штучна помилка для прикладу
-  throw new Error('Something went wrong');
-});
-
-
-// Middleware 404 (після всіх маршрутів)
+// Додано middleware для 404 (після всіх маршрутів) для обробки всіх запитів, що не відповідають жодному наявному маршруту
 app.use((req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-// Middleware для обробки помилок
+// Додано middleware для помилок 500
 app.use((err, req, res, next) => {
   console.error('Error:', err.message);
-  res.status(500).json({
-    message: 'Internal Server Error',
-    error: err.message,
-  });
+  res.status(500).json({ message: err.message });
 });
 
 // Запуск сервера

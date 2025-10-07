@@ -7,21 +7,28 @@ export const getAllNotes = async (req, res) => {
   const { page = 1, perPage = 10, tag, search} = req.query;
   const skip = (page - 1) * perPage;
 
+  // Фільтр підрахунку
+   const countQuery = Note.find();
+  if (req.query.tag) {
+    countQuery.where("tag").equals(tag);
+  }
+  if (req.query.search) {
+    countQuery.where({ $text: { $search: search } });
+  };
 
-  const notesQuery = Note.find();
-
-// Будуємо фільтр
+  // Фільтр вибірки
+   const notesQuery = Note.find();
   if (req.query.tag) {
     notesQuery.where("tag").equals(tag);
   }
-
   if (req.query.search) {
     notesQuery.where({ $text: { $search: search } });
   };
 
 
+
   const [totalNotes, notes] = await Promise.all([
-    notesQuery.clone().countDocuments(),
+    countQuery.countDocuments(),
     notesQuery.skip(skip).limit(perPage),
   ]);
 
@@ -60,7 +67,7 @@ export const deleteNote = async (req, res, next) => {
     next(createHttpError(404, "Note not found"));
     return;
   }
-  res.status(200).send(note);
+  res.status(200).json(note);
 };
 
 // Оновлення нотатки за id

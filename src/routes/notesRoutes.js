@@ -18,4 +18,5 @@ router.delete('/notes/:noteId', celebrate(noteIdSchema), deleteNote);
 
 router.patch('/notes/:noteId', celebrate(updateNoteSchema), updateNote);
 
+
 export default router;

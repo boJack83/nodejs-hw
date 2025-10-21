@@ -167,8 +167,7 @@ export const resetPassword = async (req, res, next) => {
     return;
   }
 
-  // 3. Якщо користувач існує
-  // створюємо новий пароль і оновлюємо користувача
+  // 3. Якщо користувач існує створюємо новий пароль і оновлюємо користувача
   const hashedPassword = await bcrypt.hash(password, 10);
   await User.updateOne(
 	  { _id: user._id },

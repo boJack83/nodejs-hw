@@ -12,6 +12,7 @@ import { errorHandler } from './middleware/errorHandler.js';
 import notesRoutes from './routes/notesRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import cookieParser from "cookie-parser";
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT ?? 3030; // Використовуємо значення з .env або дефолтний порт 3030
@@ -24,6 +25,7 @@ app.use(cookieParser());
 
 app.use(notesRoutes);    // 4. Підключаємо групу маршрутів
 app.use(authRoutes);
+app.use(userRoutes);
 
 app.use(notFoundHandler); // 404 — якщо маршрут не знайдено
 

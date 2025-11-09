@@ -3,9 +3,41 @@ import createHttpError from 'http-errors';
 
 // Отримати список усіх нотатків
 export const getAllNotes = async (req, res) => {
-  const notes = await Note.find();
-  res.status(200).json(notes);
+
+  const { page = 1, perPage = 10, tag, search} = req.query;
+  const skip = (page - 1) * perPage;
+
+  // Фільтр підрахунку
+   const countQuery = Note.find();
+  if (req.query.tag) {
+    countQuery.where("tag").equals(tag);
+  }
+  if (req.query.search) {
+    countQuery.where({ $text: { $search: search } });
+  };
+
+  // Фільтр вибірки
+   const notesQuery = Note.find();
+  if (req.query.tag) {
+    notesQuery.where("tag").equals(tag);
+  }
+  if (req.query.search) {
+    notesQuery.where({ $text: { $search: search } });
+  };
+
+
+
+  const [totalNotes, notes] = await Promise.all([
+    countQuery.countDocuments(),
+    notesQuery.skip(skip).limit(perPage),
+  ]);
+
+  const totalPages = Math.ceil(totalNotes / perPage);
+  res.status(200).json({ page, perPage, totalNotes, totalPages, notes,});
 };
+
+
+
 
 // Отримати одну нотатку за id
 export const getNoteById = async (req, res, next) => {
@@ -35,7 +67,7 @@ export const deleteNote = async (req, res, next) => {
     next(createHttpError(404, "Note not found"));
     return;
   }
-  res.status(200).send(note);
+  res.status(200).json(note);
 };
 
 // Оновлення нотатки за id
